@@ -1,7 +1,7 @@
 ---
 title: Test gallery
 date: 2026-10-17
-description: "Two images from the images: list."
+description: "Four images from the images: list."
 skeleton: gallery
 images:
   - path: ./images/gallery/test-gallery/one.png
