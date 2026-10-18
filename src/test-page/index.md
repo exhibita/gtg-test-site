@@ -13,3 +13,4 @@ Welcome to the test page. This page tests the generation and display of standalo
 * **Title & Date Injection**: Title and creation date are automatically populated into the layout.
 * **Pretty URLs**: Compiles to `dist/test-page/index.html` with depth-adjusted relative assets.
 
+## Finished
