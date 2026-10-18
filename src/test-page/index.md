@@ -1,5 +1,5 @@
 ---
-title: Test Page
+title: "Recipe: \"Pasta\" & more"
 date: 2026-07-27
 description: A test page to verify page skeleton layout and generation.
 skeleton: page
