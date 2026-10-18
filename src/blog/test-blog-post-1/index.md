@@ -6,3 +6,6 @@ skeleton: blog
 ---
 
 a few words
+
+![Sunset](./images/blog/test-blog-post-1/1000015004.jpg)
+
