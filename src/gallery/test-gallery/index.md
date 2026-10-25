@@ -18,6 +18,7 @@ images:
     caption: "Moonset, for real."
   - path: ./images/gallery/test-gallery/2026-10-25-120000-test-1.jpg
     alt: "Gorilla To Go welcome screen, light theme (inbox test)"
+  - path: ./images/gallery/test-gallery/2026-10-25-130000-test-3.jpg
 ---
 
 A gallery made from front matter.
