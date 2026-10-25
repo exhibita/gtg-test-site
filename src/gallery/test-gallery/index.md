@@ -21,3 +21,5 @@ images:
 ---
 
 A gallery made from front matter.
+
+<!-- conflict test 2026-10-25 -->
