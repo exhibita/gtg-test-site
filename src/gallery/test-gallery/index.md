@@ -19,6 +19,9 @@ images:
   - path: ./images/gallery/test-gallery/2026-10-25-120000-test-1.jpg
     alt: "Gorilla To Go welcome screen, light theme (inbox test)"
   - path: ./images/gallery/test-gallery/2026-10-25-130000-test-3.jpg
+  - path: ./images/gallery/test-gallery/pxl-20261026-140605371.jpg
+    alt: "Moonrise over Pacific Ocean on a October morning"
+    caption: "Moonrise over Pacific Ocean on a October morning looking towards Catalina Island from San Clemente"
 ---
 
 A gallery made from front matter.
