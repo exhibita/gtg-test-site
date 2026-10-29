@@ -1,6 +1,6 @@
 {
   "_comment": "WARNING: Do NOT put secrets (passwords, API keys, tokens, access keys) in this file. It is committed to the GitHub repository.",
   "siteUrl": "https://exhibita.github.io/gtg-test-site",
-  "siteTitle": "GTG Test Site",
+  "siteTitle": "GTG Test Site (edited)",
   "siteDescription": "The test site of Gorilla To Go."
 }
