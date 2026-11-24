@@ -13,11 +13,13 @@ const execPromise = promisify(exec);
 const SRC_DIR = './src';
 const DIST_DIR = './dist';
 
-// Default configuration (can be overriden via config.json or env variables)
+// Default configuration (overridden by config.json, then by env variables)
+const DEFAULT_SITE_URL = 'https://exhibita.github.io/vanilla-gorilla';
+const TEMPLATE_REPOSITORY = 'exhibita/vanilla-gorilla';
 const config = {
-    siteUrl: process.env.SITE_URL || 'https://exhibita.github.io/vanilla-gorilla',
-    siteTitle: process.env.SITE_TITLE || 'Vanilla Gorilla',
-    siteDescription: process.env.SITE_DESCRIPTION || 'Vanilla HTML/CSS/JS compiler with agentic superpowers.',
+    siteUrl: DEFAULT_SITE_URL,
+    siteTitle: 'Vanilla Gorilla',
+    siteDescription: 'Vanilla HTML/CSS/JS compiler with agentic superpowers.',
     rssItemLimit: 20,
     postsPerPage: 10
 };
@@ -30,6 +32,16 @@ try {
     }
 } catch (err) {
     console.warn('Warning: Failed to parse config.json, using defaults.', err.message);
+}
+
+// Environment variables win over config.json
+if (process.env.SITE_URL) config.siteUrl = process.env.SITE_URL;
+if (process.env.SITE_TITLE) config.siteTitle = process.env.SITE_TITLE;
+if (process.env.SITE_DESCRIPTION) config.siteDescription = process.env.SITE_DESCRIPTION;
+
+// A site deployed with the template's address gets a wrong RSS feed and sitemap
+if (process.env.GITHUB_ACTIONS === 'true' && config.siteUrl === DEFAULT_SITE_URL && process.env.GITHUB_REPOSITORY !== TEMPLATE_REPOSITORY) {
+    console.warn(`Warning: siteUrl is the template default (${DEFAULT_SITE_URL}). Set siteUrl, siteTitle and siteDescription in config.json, so the RSS feed and sitemap use this site's address.`);
 }
 
 const { siteUrl: SITE_URL, siteTitle: SITE_TITLE, siteDescription: SITE_DESCRIPTION, rssItemLimit: RSS_ITEM_LIMIT, postsPerPage: POSTS_PER_PAGE } = config;
@@ -198,7 +210,10 @@ function collectHtmlPostMetadata(slug, content) {
         console.warn(`Warning: No publish date found for blog post "${slug}"; it will sort last.`);
     }
 
-    blogPosts.set(slug, { slug, title, date, description });
+    const image = ($('meta[property="og:image"]').attr('content') || '').trim();
+    const badge = ($('meta[property="article:section"]').attr('content') || '').trim();
+
+    blogPosts.set(slug, { slug, title, date, description, image, badge });
 }
 
 // Extract gallery metadata from compiled HTML gallery
@@ -375,7 +390,7 @@ async function compileMarkdownFile(filePath) {
     if (slug) {
         const description = frontmatter.description
             || truncateText(cheerio.load(bodyHtml)('p').first().text());
-        blogPosts.set(slug, { slug, title: frontmatter.title, date, description });
+        blogPosts.set(slug, { slug, title: frontmatter.title, date, description, ...postCardFields(frontmatter) });
     }
 
     const gallerySlug = linksPage ? null : gallerySlugFor(relativePath);
@@ -441,6 +456,16 @@ function escapeXml(text) {
 function relativeImagePath(imagePath) {
     if (/^(\.{0,2}\/|[a-z][a-z0-9+.-]*:)/i.test(imagePath)) return imagePath;
     return `./${imagePath}`;
+}
+
+// Read the optional "image:" and "badge:" front matter of a blog post.
+// The blog index and the recent posts list show them. A post with neither builds the same as before.
+function postCardFields(frontmatter) {
+    const image = typeof frontmatter.image === 'string' && frontmatter.image.trim()
+        ? relativeImagePath(frontmatter.image.trim())
+        : '';
+    const badge = frontmatter.badge == null ? '' : String(frontmatter.badge).trim();
+    return { image, badge };
 }
 
 // Read the "images:" front matter list. Return the usable entries as { src, alt, caption }.
@@ -605,9 +630,16 @@ async function generateBlogIndex() {
             const summaryHtml = post.description
                 ? `\n                        <div class="entry-summary">\n                            <p>${escapeHtml(post.description)}</p>\n                        </div>`
                 : '';
-            return `                    <article class="post type-post status-publish format-standard hentry">
-                        <header class="entry-header">
-                            <h2 class="entry-title"><a href="${postHrefPrefix}${encodeURI(post.slug)}/">${escapeHtml(post.title)}</a></h2>${dateHtml}
+            const postHref = `${postHrefPrefix}${encodeURI(post.slug)}/`;
+            const thumbnailHtml = post.image
+                ? `\n                        <a class="post-thumbnail" href="${postHref}" tabindex="-1" aria-hidden="true"><img src="${escapeHtml(post.image)}" alt="" loading="lazy"></a>`
+                : '';
+            const badgeHtml = post.badge
+                ? `\n                            <span class="entry-badge">${escapeHtml(post.badge)}</span>`
+                : '';
+            return `                    <article class="post type-post status-publish format-standard hentry${post.image ? ' has-post-thumbnail' : ''}">${thumbnailHtml}
+                        <header class="entry-header">${badgeHtml}
+                            <h2 class="entry-title"><a href="${postHref}">${escapeHtml(post.title)}</a></h2>${dateHtml}
                         </header>${summaryHtml}
                     </article>`;
         }).join('\n');
@@ -695,7 +727,27 @@ async function generateRecentPostsInclude() {
     const posts = sortedPosts().slice(0, 5);
     
     const items = posts.map(post => {
-        return `    <li><a class="wp-block-latest-posts__post-title" href="./blog/${encodeURI(post.slug)}/">${escapeHtml(post.title)}</a></li>`;
+        const postHref = `./blog/${encodeURI(post.slug)}/`;
+        const titleHtml = `<a class="wp-block-latest-posts__post-title" href="${postHref}">${escapeHtml(post.title)}</a>`;
+        // A post with no "image:" and no "badge:" keeps the title-only item.
+        if (!post.image && !post.badge) {
+            return `    <li>${titleHtml}</li>`;
+        }
+        const lines = [];
+        if (post.image) {
+            lines.push(`<a class="wp-block-latest-posts__featured-image" href="${postHref}" tabindex="-1" aria-hidden="true"><img src="${escapeHtml(post.image)}" alt="" loading="lazy"></a>`);
+        }
+        if (post.badge) {
+            lines.push(`<span class="wp-block-latest-posts__badge">${escapeHtml(post.badge)}</span>`);
+        }
+        lines.push(titleHtml);
+        if (post.date) {
+            lines.push(`<time class="wp-block-latest-posts__post-date" datetime="${post.date.toISOString().slice(0, 10)}">${formatDisplayDate(post.date)}</time>`);
+        }
+        if (post.description) {
+            lines.push(`<div class="wp-block-latest-posts__post-excerpt">${escapeHtml(post.description)}</div>`);
+        }
+        return `    <li${post.image ? ' class="has-post-thumbnail"' : ''}>\n${lines.map(line => `        ${line}`).join('\n')}\n    </li>`;
     }).join('\n');
 
     const content = `<!-- 
@@ -820,7 +872,7 @@ async function collectAllMetadata(dir = SRC_DIR) {
                         const date = parseFrontmatterDate(frontmatter.date);
                         const description = frontmatter.description
                             || truncateText(cheerio.load(marked.parse(markdownBody))('p').first().text());
-                        blogPosts.set(slug, { slug, title: frontmatter.title, date, description });
+                        blogPosts.set(slug, { slug, title: frontmatter.title, date, description, ...postCardFields(frontmatter) });
                     }
                 }
             } else if (gallerySlug) {

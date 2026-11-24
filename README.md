@@ -47,6 +47,11 @@ To scaffold a new page or blog post with appropriate relative path nesting:
   ```bash
   npm run create-page -- page my-custom-page
   ```
+- **Blog post image and badge**: add `image:` (a path from `src/` or a full URL) and `badge:` (a short label) to the front matter of a blog post. The blog index and the recent posts list then show them (see [docs/UPGRADE-v4.md](docs/UPGRADE-v4.md)):
+  ```yaml
+  image: ./images/blog/my-post.png   # optional
+  badge: Hair Care                    # optional
+  ```
 - **Gallery**: create a Markdown page with the `gallery` skeleton, then add an `images:` list to its front matter (see [docs/UPGRADE-v2.md](docs/UPGRADE-v2.md#galleries)):
   ```bash
   npm run create-md -- gallery gallery/travel-photos
@@ -94,7 +99,7 @@ The stylesheet `src/css/style.css` provides a simple, light-background organic s
 ### CSS-Only Lightshow Lightbox
 The gallery skeleton (`src/skeletons/gallery-skeleton.html`) features a pure-CSS interactive Lightshow lightbox. List the images in the `images:` front matter of a gallery page, and `build.js` generates the grid and the lightbox. By targeting elements via the CSS `:target` selector, clicking an image triggers a modal overlay without using a single line of client-side JavaScript. This preserves lightning-fast load times.
 
-This is template version 2 (`"vanillaGorilla": { "templateVersion": 2 }` in `package.json`). To upgrade an older site, see [docs/UPGRADE-v2.md](docs/UPGRADE-v2.md).
+This is template version 4 (`"vanillaGorilla": { "templateVersion": 4 }` in `package.json`). To upgrade an older site, see [docs/UPGRADE-v4.md](docs/UPGRADE-v4.md) (blog post image and badge), [docs/UPGRADE-v3.md](docs/UPGRADE-v3.md) (links pages) and [docs/UPGRADE-v2.md](docs/UPGRADE-v2.md) (drafts and galleries).
 
 ### Building Your Own Theme
 Want to replace the default look, or port an existing website into Vanilla Gorilla? See [docs/THEMING.md](docs/THEMING.md) for a full guide to the template/skeleton system and a step-by-step conversion walkthrough. We have included a SKILL called design-apply that you can reference directly or by inference to allow the agent(s) to accomplish this task for you.
