@@ -3,6 +3,7 @@ title: "Café déjà vu"
 date: 2026-10-18
 description: "affa"
 skeleton: blog
+image: "./images/blog/cafe-deja-vu-lulu/pxl-20240818-132332172-mp.jpg"
 badge: "sunrise"
 ---
 
