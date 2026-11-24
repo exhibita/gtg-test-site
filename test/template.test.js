@@ -7,8 +7,8 @@ import { ROOT, buildSite } from './build-site.js';
 
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 
-test('package.json declares template version 3', () => {
-    assert.deepEqual(pkg.vanillaGorilla, { templateVersion: 3 });
+test('package.json declares template version 4', () => {
+    assert.deepEqual(pkg.vanillaGorilla, { templateVersion: 4 });
 });
 
 test('package.json declares the AGPL-3.0-or-later license', () => {
@@ -27,15 +27,15 @@ test('the real template src/ builds with exit code 0', () => {
     assert.equal(site.status, 0, site.output);
 });
 
-test('the demo gallery is a Markdown gallery with 4 images', () => {
-    const $ = cheerio.load(site.read('gallery/earthy-lightshow/index.html'));
-    assert.equal($('.entry-title').text().trim(), 'Earthy Lightshow Gallery');
+test('the test gallery is a Markdown gallery with 4 images', () => {
+    const $ = cheerio.load(site.read('gallery/test-gallery/index.html'));
+    assert.equal($('.entry-title').text().trim(), 'Test gallery');
     assert.equal($('#gallery .gallery-item').length, 4);
     assert.equal($('.lightbox-target').length, 4);
-    assert.equal($('#gallery img').first().attr('src'), '../../images/gallery/sage-horizon.png');
+    assert.equal($('#gallery img').first().attr('src'), '../../images/gallery/test-gallery/one.png');
 });
 
-test('/gallery/ is the generated index and links to the demo gallery', () => {
+test('/gallery/ is the generated index and links to the test gallery', () => {
     const $ = cheerio.load(site.read('gallery/index.html'));
-    assert.equal($('#gallery-list a[href="earthy-lightshow/"]').length, 1);
+    assert.equal($('#gallery-list a[href="test-gallery/"]').length, 1);
 });
